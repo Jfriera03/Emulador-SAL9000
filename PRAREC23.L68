@@ -1,0 +1,752 @@
+00001048 Starting Address
+Assembler used: EASy68K Editor/Assembler v5.16.01
+Created On: 29/06/2023 16:19:59
+
+00000000                             1  *-----------------------------------------------------------
+00000000                             2  * Title      : PRAREC23
+00000000                             3  * Written by : Antoni Navarro Moreno
+00000000                             4  *              Constantino PÃ©rez Palacios
+00000000                             5  *              Juan Francisco Riera FernÃ¡ndez
+00000000                             6  * Date       : 30/06/2023
+00000000                             7  * Description: Emulador de la SAL9000
+00000000                             8  *-----------------------------------------------------------
+00001000                             9      ORG $1000
+00001000= 2882 289B 28B4 2...       10  EMEM: DC.W $2882,$289B,$28B4,$281D,$C026,$0060,$C037,$0071,$1900
+00001012= 1910 0816 E046 2...       11        DC.W $1910,$0816,$E046,$27FD,$4008,$77A8,$8000,$0001
+00001022= 0001 0001 0001 0...       12        DC.W $0001,$0001,$0001,$0001,$0001,$0000,$0000,$0000
+00001032= 0000                      13  EIR:  DC.W 0 ;eregistro de instruccion
+00001034= 0000                      14  EPC:  DC.W 0 ;econtador de programa
+00001036= 0000                      15  ET0:  DC.W 0 ;eregistro T0
+00001038= 0000                      16  ET1:  DC.W 0 ;eregistro T1
+0000103A= 0000                      17  EX2:  DC.W 0 ;eregistro X2
+0000103C= 0000                      18  EX3:  DC.W 0 ;eregistro X3
+0000103E= 0000                      19  EX4:  DC.W 0 ;eregistro X4
+00001040= 0000                      20  EX5:  DC.W 0 ;eregistro X5
+00001042= 0000                      21  EX6:  DC.W 0 ;eregistro X6
+00001044= 0000                      22  EX7:  DC.W 0 ;eregistro X7
+00001046= 0000                      23  ESR:  DC.W 0 ;eregistro de estado (00000000 00000ZCN)
+00001048                            24  
+00001048                            25  START:
+00001048  4278 1034                 26      CLR.W EPC
+0000104C                            27  
+0000104C                            28  FETCH:
+0000104C                            29      ;--- IFETCH: INICIO FETCH
+0000104C                            30          ;*** En esta seccion debeis introducir el codigo necesario para cargar
+0000104C                            31          ;*** en el EIR la siguiente instruccion a ejecutar, indicada por el EPC,
+0000104C                            32          ;*** y dejar listo el EPC para que apunte a la siguiente instruccion
+0000104C                            33      
+0000104C                            34              ; ESCRIBID VUESTRO CODIGO AQUI
+0000104C                            35              
+0000104C  3638 1034                 36              MOVE.W EPC,D3
+00001050  D643                      37              ADD.W D3,D3
+00001052  3043                      38              MOVEA.W D3,A0
+00001054  31E8 1000 1032            39              MOVE.W EMEM(A0),EIR         ;obtención de la siguiente instrucción
+0000105A  5278 1034                 40              ADDQ.W #1,EPC               ;incremento del contador de programa 
+0000105E                            41                                          ;para acceder a la siguiente instrucción
+0000105E                            42                                          ;más adelante
+0000105E                            43          
+0000105E                            44      ;--- FFETCH: FIN FETCH
+0000105E                            45      
+0000105E                            46      
+0000105E                            47      
+0000105E                            48      ;--- IBRDECOD: INICIO SALTO A DECOD
+0000105E                            49          ;*** En esta seccion debeis preparar la pila para llamar a la subrutina
+0000105E                            50          ;*** DECOD, llamar a la subrutina, y vaciar la pila correctamente,
+0000105E                            51          ;*** almacenando el resultado de la decodificacion en D1
+0000105E                            52  
+0000105E                            53              ; ESCRIBID VUESTRO CODIGO AQUI
+0000105E                            54              
+0000105E  3F3C 0000                 55              MOVE.W #0,-(SP)             ;dejamos un espacio en blanco para 
+00001062                            56                                          ;devolver el id de la enstrucción
+00001062  3F38 1032                 57              MOVE.W EIR,-(SP)            ;paso de los parametros pertinenetes
+00001066  4EB9 000015D4             58              JSR DECOD
+0000106C  544F                      59              ADDQ.W #2,SP                ;vaciado de la pila para obtener el
+0000106E                            60                                          ;parámetro de salida
+0000106E  321F                      61              MOVE.W (SP)+,D1
+00001070                            62          
+00001070                            63      ;--- FBRDECOD: FIN SALTO A DECOD
+00001070                            64      
+00001070                            65      
+00001070                            66      
+00001070                            67      ;--- IBREXEC: INICIO SALTO A FASE DE EJECUCION
+00001070                            68          ;*** Esta seccion se usa para saltar a la fase de ejecucion
+00001070                            69          ;*** NO HACE FALTA MODIFICARLA
+00001070  C2FC 0006                 70      MULU #6,D1
+00001074  2241                      71      MOVEA.L D1,A1
+00001076  4EE9 107A                 72      JMP JMPLIST(A1)
+0000107A                            73  JMPLIST:
+0000107A  4EF9 000010E0             74      JMP ECOPY
+00001080  4EF9 00001100             75      JMP EADD
+00001086  4EF9 0000112A             76      JMP ESUB
+0000108C  4EF9 00001158             77      JMP ELSH
+00001092  4EF9 000011A2             78      JMP EADQ
+00001098  4EF9 000011C2             79      JMP ESET
+0000109E  4EF9 000011E2             80      JMP EOR
+000010A4  4EF9 0000120C             81      JMP ENOT
+000010AA  4EF9 00001228             82      JMP EGOZ
+000010B0  4EF9 00001248             83      JMP EGOC
+000010B6  4EF9 00001268             84      JMP EGON
+000010BC  4EF9 00001288             85      JMP EGOI
+000010C2  4EF9 0000129C             86      JMP EEXIT
+000010C8  4EF9 000012A0             87      JMP ELOIP
+000010CE  4EF9 000012C8             88      JMP ELOA
+000010D4  4EF9 000012EE             89      JMP ESTIP
+000010DA  4EF9 00001310             90      JMP ESTO
+000010E0                            91      ;--- FBREXEC: FIN SALTO A FASE DE EJECUCION
+000010E0                            92      
+000010E0                            93      
+000010E0                            94      
+000010E0                            95      ;--- IEXEC: INICIO EJECUCION
+000010E0                            96          ;*** En esta seccion debeis implementar la ejecucion de cada einstr.
+000010E0                            97      
+000010E0                            98      ; ESCRIBID EN CADA ETIQUETA LA FASE DE EJECUCION DE CADA INSTRUCCION
+000010E0                            99  ECOPY:
+000010E0  4EB9 000013B0            100          JSR REGISTRO_B                  ;obtención de la posición de memoria del
+000010E6                           101                                          ;registro b
+000010E6  3A12                     102          MOVE.W (A2),D5
+000010E8  4EB9 00001430            103          JSR REGISTRO_C                  ;obtención de la posición de memoria del
+000010EE                           104                                          ;registro c
+000010EE  3685                     105          MOVE.W D5,(A3)
+000010F0  3C05                     106          MOVE.W D5,D6
+000010F2  3E38 1046                107          MOVE.W ESR,D7
+000010F6  4EB9 000014EA            108          JSR ZN_FLAG
+000010FC  6000 FF4E                109          BRA FETCH
+00001100                           110          
+00001100                           111  EADD:
+00001100  4EB9 00001330            112          JSR REGISTRO_A                  ;obtención de la posición de memoria del
+00001106                           113                                          ;registro a
+00001106  3811                     114          MOVE.W (A1),D4
+00001108  4EB9 000013B0            115          JSR REGISTRO_B                  ;obtención de la posición de memoria del
+0000110E                           116                                          ;registro b
+0000110E  3A12                     117          MOVE.W (A2),D5
+00001110  4EB9 00001430            118          JSR REGISTRO_C                  ;obtención de la posición de memoria del
+00001116                           119                                          ;registro c
+00001116  DA44                     120          ADD.W D4,D5
+00001118  40C6                     121          MOVE.W SR,D6
+0000111A  3E38 1046                122          MOVE.W ESR,D7
+0000111E  3685                     123          MOVE.W D5,(A3)        
+00001120  4EB9 0000158C            124          JSR ACT_ESR_C                   ;actualización de los flags
+00001126  6000 FF24                125          BRA FETCH
+0000112A                           126          
+0000112A                           127  ESUB:
+0000112A  4EB9 00001330            128          JSR REGISTRO_A                  ;obtención de la posición de memoria del
+00001130                           129                                          ;registro a
+00001130  3811                     130          MOVE.W (A1),D4
+00001132  4EB9 000013B0            131          JSR REGISTRO_B                  ;obtención de la posición de memoria del
+00001138                           132                                          ;registro b
+00001138  3A12                     133          MOVE.W (A2),D5
+0000113A  4EB9 00001430            134          JSR REGISTRO_C                  ;obtención de la posición de memoria del
+00001140                           135                                          ;registro b
+00001140  4445                     136          NEG D5
+00001142  5245                     137          ADDQ.W #1,D5
+00001144  DA44                     138          ADD.W D4,D5
+00001146  40C6                     139          MOVE.W SR,D6
+00001148  3E38 1046                140          MOVE.W ESR,D7
+0000114C  3685                     141          MOVE.W D5,(A3)
+0000114E  4EB9 0000158C            142          JSR ACT_ESR_C
+00001154  6000 FEF6                143          BRA FETCH
+00001158                           144  
+00001158                           145  ELSH:
+00001158  4245                     146          CLR D5
+0000115A  3A38 1032                147          MOVE.W EIR,D5                   ;mover la instrucción a ejecutar
+0000115E  343C 0700                148          MOVE.W #$0700,D2                ;mascara para obtener la p
+00001162  C445                     149          AND.W D5,D2
+00001164  E04A                     150          LSR #8,D2                       ;desplazamiento a la izquierda del valor
+00001166                           151                                          ;del registro b
+00001166  1602                     152          MOVE.B D2,D3
+00001168  4883                     153          EXT D3
+0000116A  4EB9 000013B0            154          JSR REGISTRO_B                  ;obtención de la posición de memoria del
+00001170                           155                                          ;registro b
+00001170  3812                     156          MOVE.W (A2),D4
+00001172  0805 0000                157          BTST #0,D5
+00001176  6600 0016                158          BNE RS
+0000117A  E76C                     159          LSL D3,D4                       ;desplazamiento a la izquierda del valor
+0000117C                           160                                          ;del registro b
+0000117C  40C6                     161          MOVE.W SR,D6
+0000117E  3484                     162          MOVE.W D4,(A2)
+00001180  3E38 1046                163          MOVE.W ESR,D7
+00001184  4EB9 0000158C            164          JSR ACT_ESR_C                   ;actualización de flags
+0000118A  6000 0012                165          BRA FIN_ELSH        
+0000118E                           166  RS:     
+0000118E  E66C                     167          LSR D3,D4
+00001190  40C6                     168          MOVE.W SR,D6
+00001192  3484                     169          MOVE.W D4,(A2)
+00001194  3E38 1046                170          MOVE.W ESR,D7
+00001198  4EB9 000014CE            171          JSR C_FLAG                      ;actualización de flags
+0000119E                           172  FIN_ELSH:
+0000119E  6000 FEAC                173          BRA FETCH
+000011A2                           174          
+000011A2                           175  EADQ:
+000011A2  4EB9 00001430            176          JSR REGISTRO_C                  ;obtención de la posición de memoria del
+000011A8                           177                                          ;registro c
+000011A8  4EB9 000014BE            178          JSR FETCH_K                     ;obtención de un número
+000011AE  4884                     179          EXT.W D4
+000011B0  D953                     180          ADD.W D4,(A3)
+000011B2  40C6                     181          MOVE.W SR,D6
+000011B4  3E38 1046                182          MOVE.W ESR,D7
+000011B8  4EB9 0000158C            183          JSR ACT_ESR_C                   ;actualización de flags
+000011BE  6000 FE8C                184          BRA FETCH
+000011C2                           185          
+000011C2                           186  ESET:
+000011C2  4EB9 00001430            187          JSR REGISTRO_C                  ;obtención de la posición de memoria del
+000011C8                           188                                          ;registro c
+000011C8  4EB9 000014BE            189          JSR FETCH_K
+000011CE  4884                     190          EXT.W D4
+000011D0  3684                     191          MOVE.W D4,(A3)
+000011D2  3C13                     192          MOVE.W (A3),D6
+000011D4  3E38 1046                193          MOVE.W ESR,D7
+000011D8  4EB9 000014EA            194          JSR ZN_FLAG                     ;actualización de flags
+000011DE  6000 FE6C                195          BRA FETCH
+000011E2                           196          
+000011E2                           197  EOR:
+000011E2  4EB9 00001330            198          JSR REGISTRO_A                  ;obtención de la posición de memoria del
+000011E8                           199                                          ;registro a
+000011E8  3811                     200          MOVE.W (A1),D4
+000011EA  4EB9 000013B0            201          JSR REGISTRO_B                  ;obtención de la posición de memoria del
+000011F0                           202                                          ;registro b
+000011F0  3A12                     203          MOVE.W (A2),D5
+000011F2  8A44                     204          OR.W D4,D5
+000011F4  40C6                     205          MOVE.W SR,D6
+000011F6  3E38 1046                206          MOVE.W ESR,D7
+000011FA  4EB9 00001430            207          JSR REGISTRO_C                  ;obtención de la posición de memoria del
+00001200                           208                                          ;registro c
+00001200  3685                     209          MOVE.W D5,(A3)
+00001202  4EB9 000015A6            210          JSR ACT_ESR_ZN                  ;actualización de flags
+00001208  6000 FE42                211          BRA FETCH
+0000120C                           212          
+0000120C                           213  ENOT:   
+0000120C  4EB9 00001430            214          JSR REGISTRO_C                  ;obtención de la posición de memoria del
+00001212                           215                                          ;registro c
+00001212  3813                     216          MOVE.W (A3),D4
+00001214  4644                     217          NOT.W D4                        
+00001216  40C6                     218          MOVE.W SR,D6
+00001218  3E38 1046                219          MOVE.W ESR,D7
+0000121C  3684                     220          MOVE.W D4,(A3)              
+0000121E  4EB9 0000158C            221          JSR ACT_ESR_C                   ;actualización de flags
+00001224  6000 FE26                222          BRA FETCH
+00001228                           223  EGOZ:
+00001228  3C38 1046                224          MOVE.W ESR,D6
+0000122C  0806 0002                225          BTST.L #2,D6                    ; comprobamos si el flag Z es 0
+00001230  6700 FE1A                226          BEQ FETCH                       ; si lo es, volvemos a la fase de fetch
+00001234  4EB9 000014BE            227          JSR FETCH_K
+0000123A  4884                     228          EXT.W D4                        ; extendemos el signo de K
+0000123C  D878 1034                229          ADD.W (EPC),D4
+00001240  31C4 1034                230          MOVE.W D4,EPC
+00001244  6000 FE06                231          BRA FETCH
+00001248                           232      
+00001248                           233  EGOC:
+00001248  3C38 1046                234          MOVE.W ESR,D6           
+0000124C  0806 0001                235          BTST.L #1,D6                    ; comprobamos si el flag N es 0
+00001250  6700 FDFA                236          BEQ FETCH                       ; si lo es, volvemos a la fase de fetch
+00001254  4EB9 000014BE            237          JSR FETCH_K
+0000125A  4884                     238          EXT.W D4                        ; extendemos el signo de K
+0000125C  D878 1034                239          ADD.W (EPC),D4
+00001260  31C4 1034                240          MOVE.W D4,EPC                   ; si es 1, se carga M en el PC
+00001264  6000 FDE6                241          BRA FETCH
+00001268                           242  
+00001268                           243  EGON:
+00001268  3C38 1046                244          MOVE.W ESR,D6           
+0000126C  0806 0000                245          BTST.L #0,D6                    ; comprobamos si el flag N es 0
+00001270  6700 FDDA                246          BEQ FETCH                       ; si lo es, volvemos a la fase de fetch
+00001274  4EB9 000014BE            247          JSR FETCH_K
+0000127A  4884                     248          EXT.W D4                        ; extendemos el signo de K
+0000127C  D878 1034                249          ADD.W (EPC),D4
+00001280  31C4 1034                250          MOVE.W D4,EPC                   ; si es 1, se carga M en el PC
+00001284  6000 FDC6                251          BRA FETCH
+00001288                           252      
+00001288                           253  EGOI:
+00001288  4EB9 000014BE            254          JSR FETCH_K                     ;obtención del número
+0000128E  4884                     255          EXT.W D4
+00001290  D878 1034                256          ADD.W (EPC),D4                  ; extendemos el signo de K
+00001294  31C4 1034                257          MOVE.W D4,EPC                   ; cargamos M en el PC
+00001298  6000 FDB2                258          BRA FETCH
+0000129C                           259  
+0000129C                           260          
+0000129C                           261  EEXIT:
+0000129C  FFFF FFFF                262          SIMHALT
+000012A0                           263  
+000012A0                           264  ELOIP:
+000012A0  4EB9 000013B0            265          JSR REGISTRO_B                  ;obtención de la posición de memoria del
+000012A6                           266                                          ;registro b
+000012A6  284A                     267          MOVEA.L A2,A4
+000012A8  4EB9 00001430            268          JSR REGISTRO_C                  ;obtención de la posición de memoria del
+000012AE                           269                                          ;registro c
+000012AE  3A54                     270          MOVE.W (A4),A5
+000012B0  DACD                     271          ADDA.W A5,A5
+000012B2  36AD 1000                272          MOVE.W EMEM(A5),(A3)            ;mover el contenido de una posicción de
+000012B6                           273                                          ;memoria a la que apunta el contenido de
+000012B6                           274                                          ;un registro a un registro
+000012B6  5252                     275          ADDQ.W #1,(A2)
+000012B8  3C13                     276          MOVE.W (A3),D6
+000012BA  3E38 1046                277          MOVE.W ESR,D7
+000012BE  4EB9 000014EA            278          JSR ZN_FLAG                     ;actualización de flags
+000012C4  6000 FD86                279          BRA FETCH
+000012C8                           280          
+000012C8                           281  ELOA:
+000012C8  4EB9 000013B0            282          JSR REGISTRO_B                  ;obtención de la posición de memoria del
+000012CE                           283                                          ;registro b
+000012CE  4EB9 000014B0            284          JSR FETCH_M                     ;obtención de la posición de memoria
+000012D4  C4FC 0002                285          MULU.W #2,D2
+000012D8  3842                     286          MOVE.W D2,A4
+000012DA  34AC 1000                287          MOVE.W EMEM(A4),(A2)            ;mover el valor de una posicón de 
+000012DE                           288                                          ;memoria a un registro
+000012DE  3C13                     289          MOVE.W (A3),D6
+000012E0  3E38 1046                290          MOVE.W ESR,D7
+000012E4  4EB9 000014EA            291          JSR ZN_FLAG
+000012EA  6000 FD60                292          BRA FETCH
+000012EE                           293  
+000012EE                           294  ESTIP:
+000012EE  4EB9 00001430            295          JSR REGISTRO_C                  ;obtención de la posición de memoria del
+000012F4                           296                                          ;registro c
+000012F4  3853                     297          MOVEA.W (A3),A4
+000012F6  4EB9 000013B0            298          JSR REGISTRO_B                  ;obtención de la posición de memoria del
+000012FC                           299                                          ;registro b
+000012FC  3A12                     300          MOVE.W (A2),D5
+000012FE  CBFC 0002                301          MULS.W #2,D5
+00001302  4BF8 1000                302          LEA EMEM, A5
+00001306  DAC5                     303          ADD.W D5,A5
+00001308  3A8C                     304          MOVE.W A4,(A5)                  ;mover el valor de un registro a la 
+0000130A                           305                                          ;posición de memoria a la que apunta otro registro
+0000130A  5252                     306          ADD.W #1,(A2)
+0000130C  6000 FD3E                307          BRA FETCH
+00001310                           308  
+00001310                           309  ESTO:  
+00001310  4EB9 000014B0            310          JSR FETCH_M                     ;obtención de la posición de memoria
+00001316  C4FC 0002                311          MULU.W #2,D2
+0000131A  4254                     312          CLR.W (A4)
+0000131C  3842                     313          MOVE.W D2,A4
+0000131E  4EB9 00001430            314          JSR REGISTRO_C                  ;obtención de la posición de memoria del
+00001324                           315                                          ;registro c
+00001324  4244                     316          CLR.W D4
+00001326  3813                     317          MOVE.W (A3),D4
+00001328  3944 1000                318          MOVE.W D4,EMEM(A4)              ;mover el valor de un registro a una
+0000132C                           319                                          ;posición de memoria
+0000132C  6000 FD1E                320          BRA FETCH
+00001330                           321      ;--- FEXEC: FIN EJECUCION
+00001330                           322      
+00001330                           323      
+00001330                           324  
+00001330                           325      ;--- ISUBR: INICIO SUBRUTINAS
+00001330                           326          ;*** Aqui debeis incluir las subrutinas que necesite vuestra solucion
+00001330                           327          ;*** SALVO DECOD, que va en la siguiente seccion
+00001330                           328  
+00001330                           329              ; ESCRIBID VUESTRO CODIGO AQUI
+00001330                           330              REGISTRO_A:                 ;obtención de la posición de memoria del
+00001330                           331                                          ;registro a
+00001330  4242                     332              CLR D2
+00001332  3438 1032                333              MOVE.W EIR,D2     
+00001336  0802 000A                334              BTST #10,D2
+0000133A  6600 003A                335              BNE RA4
+0000133E  0802 0009                336              BTST #9,D2
+00001342  6600 001A                337              BNE RA2
+00001346  0802 0008                338              BTST #8,D2
+0000134A  6600 000A                339              BNE RA1
+0000134E  43F8 1036                340              LEA.L ET0,A1                ;T0
+00001352  6000 005A                341              BRA FIN_A
+00001356                           342  RA1:        
+00001356  43F8 1038                343              LEA.L ET1,A1                ;T1
+0000135A  6000 0052                344              BRA FIN_A
+0000135E                           345  RA2:
+0000135E  0802 0008                346              BTST #8,D2
+00001362  6600 000A                347              BNE RA3
+00001366  43F8 103A                348              LEA.L EX2,A1                ;X2
+0000136A  6000 0042                349              BRA FIN_A
+0000136E                           350  RA3:
+0000136E  43F8 103C                351              LEA.L EX3,A1                ;X3 
+00001372  6000 003A                352              BRA FIN_A      
+00001376                           353  RA4:
+00001376  0802 0009                354              BTST #9,D2
+0000137A  6600 001A                355              BNE RA6
+0000137E  0802 0008                356              BTST #8,D2
+00001382  6600 000A                357              BNE RA5
+00001386  43F8 103E                358              LEA.L EX4,A1                ;X4
+0000138A  6000 0022                359              BRA FIN_A
+0000138E                           360  RA5:
+0000138E  43F8 1040                361              LEA.L EX5,A1                ;X5
+00001392  6000 001A                362              BRA FIN_A
+00001396                           363  RA6:
+00001396  0802 0008                364              BTST #8,D2
+0000139A  6600 000A                365              BNE RA7
+0000139E  43F8 1042                366              LEA.L EX6,A1                ;X6
+000013A2  6000 000A                367              BRA FIN_A
+000013A6                           368  RA7:
+000013A6  43F8 1044                369              LEA.L EX7,A1                ;X7
+000013AA  6000 0002                370              BRA FIN_A
+000013AE                           371  FIN_A:
+000013AE  4E75                     372              RTS
+000013B0                           373  
+000013B0                           374  REGISTRO_B:                             ;obtención de la posición de memoria del
+000013B0                           375                                          ;registro b
+000013B0  4242                     376              CLR D2
+000013B2  3438 1032                377              MOVE.W EIR,D2
+000013B6  0802 0006                378              BTST #6,D2
+000013BA  6600 003A                379              BNE RB4
+000013BE  0802 0005                380              BTST #5,D2
+000013C2  6600 001A                381              BNE RB2
+000013C6  0802 0004                382              BTST #4,D2
+000013CA  6600 000A                383              BNE RB1
+000013CE  45F8 1036                384              LEA.L ET0,A2                ;T0
+000013D2  6000 005A                385              BRA FIN_B
+000013D6                           386  RB1:        
+000013D6  45F8 1038                387              LEA.L ET1,A2                ;T1
+000013DA  6000 0052                388              BRA FIN_B
+000013DE                           389  RB2:
+000013DE  0802 0004                390              BTST #4,D2
+000013E2  6600 000A                391              BNE RB3
+000013E6  45F8 103A                392              LEA.L EX2,A2                ;X2
+000013EA  6000 0042                393              BRA FIN_B
+000013EE                           394  RB3:
+000013EE  45F8 103C                395              LEA.L EX3,A2                ;X3 
+000013F2  6000 003A                396              BRA FIN_B      
+000013F6                           397  RB4:
+000013F6  0802 0005                398              BTST #5,D2
+000013FA  6600 001A                399              BNE RB6
+000013FE  0802 0004                400              BTST #4,D2
+00001402  6600 000A                401              BNE RB5
+00001406  45F8 103E                402              LEA.L EX4,A2                ;X4
+0000140A  6000 0022                403              BRA FIN_B
+0000140E                           404  RB5:
+0000140E  45F8 1040                405              LEA.L EX5,A2                ;X5
+00001412  6000 001A                406              BRA FIN_B
+00001416                           407  RB6:
+00001416  0802 0004                408              BTST #4,D2
+0000141A  6600 000A                409              BNE RB7
+0000141E  45F8 1042                410              LEA.L EX6,A2                ;X6
+00001422  6000 000A                411              BRA FIN_B
+00001426                           412  RB7:
+00001426  45F8 1044                413              LEA.L EX7,A2                ;X7
+0000142A  6000 0002                414              BRA FIN_B
+0000142E                           415  FIN_B:
+0000142E  4E75                     416              RTS
+00001430                           417  
+00001430                           418  REGISTRO_C:                             ;obtención de la posición de memoria del
+00001430                           419                                          ;registro c
+00001430  4242                     420              CLR D2
+00001432  3438 1032                421              MOVE.W EIR,D2      
+00001436  0802 0002                422              BTST #2,D2                  
+0000143A  6600 003A                423              BNE RC4
+0000143E  0802 0001                424              BTST #1,D2                  
+00001442  6600 001A                425              BNE RC2
+00001446  0802 0000                426              BTST #0,D2                  
+0000144A  6600 000A                427              BNE RC1
+0000144E  47F8 1036                428              LEA.L ET0,A3                ;T0
+00001452  6000 005A                429              BRA FIN_C
+00001456                           430  RC1:        
+00001456  47F8 1038                431              LEA.L ET1,A3                ;T1
+0000145A  6000 0052                432              BRA FIN_C
+0000145E                           433  RC2:
+0000145E  0802 0000                434              BTST #0,D2                  
+00001462  6600 000A                435              BNE RC3
+00001466  47F8 103A                436              LEA.L EX2,A3                ;X2
+0000146A  6000 0042                437              BRA FIN_C
+0000146E                           438  RC3:
+0000146E  47F8 103C                439              LEA.L EX3,A3                ;X3 
+00001472  6000 003A                440              BRA FIN_C      
+00001476                           441  RC4:
+00001476  0802 0001                442              BTST #1,D2
+0000147A  6600 001A                443              BNE RC6
+0000147E  0802 0000                444              BTST #0,D2
+00001482  6600 000A                445              BNE RC5
+00001486  47F8 103E                446              LEA.L EX4,A3                ;X4
+0000148A  6000 0022                447              BRA FIN_C
+0000148E                           448  RC5:
+0000148E  47F8 1040                449              LEA.L EX5,A3                ;X5
+00001492  6000 001A                450              BRA FIN_C
+00001496                           451  RC6:
+00001496  0802 0000                452              BTST #0,D2
+0000149A  6600 000A                453              BNE RC7
+0000149E  47F8 1042                454              LEA.L EX6,A3                ;X6
+000014A2  6000 000A                455              BRA FIN_C
+000014A6                           456  RC7:
+000014A6  47F8 1044                457              LEA.L EX7,A3                ;X7
+000014AA  6000 0002                458              BRA FIN_C
+000014AE                           459  FIN_C:
+000014AE  4E75                     460              RTS
+000014B0                           461          
+000014B0                           462  FETCH_M:                                ;obteción de la posición de memoria
+000014B0  4282                     463              CLR.L D2
+000014B2  3438 1032                464              MOVE.W EIR,D2               ;mover la instrucción para sacar el
+000014B6                           465                                          ;valor de m
+000014B6  C47C 07F8                466              AND.W #$07F8,D2             ;mascara para obtener el valor de m
+000014BA  E64A                     467              LSR.W #3,D2                 ;desplazamiento para poner el valor de m
+000014BC                           468                                          ;en el extremo
+000014BC  4E75                     469              RTS
+000014BE                           470  
+000014BE                           471  FETCH_K:                                ;obtención del número
+000014BE  4282                     472              CLR.L D2
+000014C0  3438 1032                473              MOVE.W EIR,D2               ;mover la instrucción para sacar el 
+000014C4                           474                                          ;valor de k
+000014C4  C47C 07F8                475              AND.W #$07F8,D2             ;mascara para obtener el valor de k
+000014C8  E64A                     476              LSR.W #3,D2                 ;desplazamiento para poner el valor de k
+000014CA                           477                                          ;en el extremo
+000014CA  1802                     478              MOVE.B D2,D4
+000014CC  4E75                     479              RTS        
+000014CE                           480  ;ACTUALIZACIÓN DE FLAGS
+000014CE                           481  C_FLAG:                                 ;actualización flags según registro
+000014CE  0806 0001                482              BTST #1,D6
+000014D2  6600 000A                483              BNE C_SET1
+000014D6  0887 0001                484              BCLR #1,D7
+000014DA  6000 0006                485              BRA FIN_FLAGC
+000014DE                           486  C_SET1:
+000014DE  08C7 0001                487              BSET #1,D7
+000014E2                           488  FIN_FLAGC:
+000014E2  4EB9 000014EA            489              JSR ZN_FLAG
+000014E8  4E75                     490              RTS
+000014EA                           491  ZN_FLAG:
+000014EA  0806 000F                492              BTST #15,D6
+000014EE  6600 008E                493              BNE NEGATIVO
+000014F2  0806 000E                494              BTST #14,D6
+000014F6  6600 007A                495              BNE POSITIVO
+000014FA  0806 000D                496              BTST #13,D6
+000014FE  6600 0072                497              BNE POSITIVO
+00001502  0806 000C                498              BTST #12,D6
+00001506  6600 006A                499              BNE POSITIVO
+0000150A  0806 000B                500              BTST #11,D6
+0000150E  6600 0062                501              BNE POSITIVO
+00001512  0806 000A                502              BTST #10,D6
+00001516  6600 005A                503              BNE POSITIVO
+0000151A  0806 0009                504              BTST #9,D6
+0000151E  6600 0052                505              BNE POSITIVO
+00001522  0806 0008                506              BTST #8,D6
+00001526  6600 004A                507              BNE POSITIVO
+0000152A  0806 0007                508              BTST #7,D6
+0000152E  6600 0042                509              BNE POSITIVO
+00001532  0806 0006                510              BTST #6,D6
+00001536  6600 003A                511              BNE POSITIVO
+0000153A  0806 0005                512              BTST #5,D6
+0000153E  6600 0032                513              BNE POSITIVO
+00001542  0806 0004                514              BTST #4,D6
+00001546  6600 002A                515              BNE POSITIVO
+0000154A  0806 0003                516              BTST #3,D6
+0000154E  6600 0022                517              BNE POSITIVO
+00001552  0806 0002                518              BTST #2,D6
+00001556  6600 001A                519              BNE POSITIVO
+0000155A  0806 0001                520              BTST #1,D6
+0000155E  6600 0012                521              BNE POSITIVO
+00001562  0806 0000                522              BTST #0,D6
+00001566  6600 000A                523              BNE POSITIVO
+0000156A  08C7 0002                524              BSET #2,D7
+0000156E  6000 0016                525              BRA FIN_ZN_FLAG
+00001572                           526  POSITIVO:            
+00001572  0887 0000                527              BCLR #0,D7
+00001576  0887 0002                528              BCLR #2,D7
+0000157A  6000 000A                529              BRA FIN_ZN_FLAG            
+0000157E                           530  NEGATIVO:
+0000157E  0887 0002                531              BCLR #2,D7
+00001582  08C7 0000                532              BSET #0,D7 
+00001586                           533  FIN_ZN_FLAG:
+00001586  31C7 1046                534              MOVE.W D7,ESR
+0000158A  4E75                     535              RTS
+0000158C                           536  
+0000158C                           537  ACT_ESR_C:                              ;actulización flags según operación
+0000158C  0806 0000                538      BTST #0,D6
+00001590  6600 000A                539      BNE C_1
+00001594  0887 0001                540      BCLR #1,D7
+00001598  6000 0006                541      BRA FIN_ESR_C
+0000159C                           542  C_1:
+0000159C  08C7 0001                543      BSET #1,D7 
+000015A0                           544  FIN_ESR_C:
+000015A0  6000 0004                545      BRA ACT_ESR_ZN
+000015A4  4E75                     546      RTS
+000015A6                           547         
+000015A6                           548  ACT_ESR_ZN:
+000015A6  0806 0002                549      BTST #2,D6
+000015AA  6600 000A                550      BNE Z_1
+000015AE  0887 0002                551      BCLR #2,D7
+000015B2  6000 0006                552      BRA FN
+000015B6                           553  Z_1:
+000015B6  08C7 0002                554      BSET #2,D7
+000015BA                           555  FN:
+000015BA  0806 0003                556      BTST #3,D6
+000015BE  6600 000A                557      BNE N_1
+000015C2  0887 0000                558      BCLR #0,D7
+000015C6  6000 0006                559      BRA FIN_ESR_ZN
+000015CA                           560  N_1:
+000015CA  08C7 0000                561      BSET #0,D7
+000015CE                           562  FIN_ESR_ZN:
+000015CE  31C7 1046                563      MOVE.W D7,ESR
+000015D2  4E75                     564      RTS        
+000015D4                           565      ;--- FSUBR: FIN SUBRUTINAS
+000015D4                           566  
+000015D4                           567      ;--- IDECOD: INICIO DECOD
+000015D4                           568          ;*** Tras la etiqueta DECOD, debeis implementar la subrutina de 
+000015D4                           569          ;*** decodificacion, que debera ser de libreria, siguiendo la interfaz
+000015D4                           570          ;*** especificada en el enunciado
+000015D4                           571  DECOD:
+000015D4  3F00                     572              MOVE.W D0,-(SP)
+000015D6  302F 0006                573              MOVE.W 6(SP),D0
+000015DA  0800 000F                574              BTST #15,D0             ;X     
+000015DE  6600 00D2                575              BNE ETQ12           
+000015E2  0800 000E                576              BTST #14,D0             ;0X
+000015E6  6600 008A                577              BNE ETQ8
+000015EA  0800 000D                578              BTST #13,D0             ;00X
+000015EE  6600 0042                579              BNE ETQ4
+000015F2  0800 000C                580              BTST #12,D0             ;000X
+000015F6  6600 001E                581              BNE ETQ2
+000015FA  0800 000B                582              BTST #11,D0             ;0000X
+000015FE  6600 000C                583              BNE ETQ1
+00001602  3F7C 0000 0008           584              MOVE.W #0,8(SP)
+00001608  6000 00FA                585              BRA FINAL                   ;00000
+0000160C  3F7C 0001 0008           586  ETQ1:       MOVE.W #1,8(SP)         
+00001612  6000 00F0                587              BRA FINAL                   ;00001
+00001616  0800 000B                588  ETQ2:       BTST #11,D0             ;0001X
+0000161A  6600 000C                589              BNE ETQ3
+0000161E  3F7C 0002 0008           590              MOVE.W #2,8(SP)
+00001624  6000 00DE                591              BRA FINAL                   ;00010
+00001628  3F7C 0003 0008           592  ETQ3:       MOVE.W #3,8(SP)
+0000162E  6000 00D4                593              BRA FINAL                   ;00011     
+00001632  0800 000C                594  ETQ4:       BTST #12,D0             ;001X
+00001636  6600 001E                595              BNE ETQ6
+0000163A  0800 000B                596              BTST #11,D0             ;0010X
+0000163E  6600 000C                597              BNE ETQ5
+00001642  3F7C 0004 0008           598              MOVE.W #4,8(SP)
+00001648  6000 00BA                599              BRA FINAL                   ;00100  
+0000164C  3F7C 0005 0008           600  ETQ5:       MOVE.W #5,8(SP)  
+00001652  6000 00B0                601              BRA FINAL                   ;00101                    
+00001656  0800 000B                602  ETQ6:       BTST #11,D0             ;0011X
+0000165A  6600 000C                603              BNE ETQ7
+0000165E  3F7C 0006 0008           604              MOVE.W #6,8(SP)
+00001664  6000 009E                605              BRA FINAL                   ;00110
+00001668  3F7C 0007 0008           606  ETQ7:       MOVE.W #7,8(SP)
+0000166E  6000 0094                607              BRA FINAL                   ;00111
+00001672  0800 000D                608  ETQ8:       BTST #13,D0             ;01X
+00001676  6600 001E                609              BNE ETQ10
+0000167A  0800 000C                610              BTST #12,D0             ;010X
+0000167E  6600 000C                611              BNE ETQ9
+00001682  3F7C 0008 0008           612              MOVE.W #8,8(SP)
+00001688  6000 007A                613              BRA FINAL                   ;0100       
+0000168C  3F7C 0009 0008           614  ETQ9:       MOVE.W #9,8(SP)
+00001692  6000 0070                615              BRA FINAL                   ;0101
+00001696  0800 000C                616  ETQ10:      BTST #12,D0             ;011X
+0000169A  6600 000C                617              BNE ETQ11
+0000169E  3F7C 000A 0008           618              MOVE.W #10,8(SP)
+000016A4  6000 005E                619              BRA FINAL                   ;0110
+000016A8  3F7C 000B 0008           620  ETQ11:      MOVE.W #11,8(SP)
+000016AE  6000 0054                621              BRA FINAL                   ;0111     
+000016B2  0800 000E                622  ETQ12:      BTST #14,D0             ;1X
+000016B6  6600 000C                623              BNE ETQ13
+000016BA  3F7C 000C 0008           624              MOVE.W #12,8(SP)
+000016C0  6000 0042                625              BRA FINAL               ;10   
+000016C4  0800 000D                626  ETQ13:      BTST #13,D0             ;11X
+000016C8  6600 001E                627              BNE ETQ15
+000016CC  0800 000C                628              BTST #12,D0             ;110X
+000016D0  6600 000C                629              BNE ETQ14
+000016D4  3F7C 000D 0008           630              MOVE.W #13,8(SP)
+000016DA  6000 0028                631              BRA FINAL                   ;1100                         
+000016DE  3F7C 000E 0008           632  ETQ14:      MOVE.W #14,8(SP)
+000016E4  6000 001E                633              BRA FINAL                   ;1101           
+000016E8  0800 000C                634  ETQ15:      BTST #12,D0             ;111X
+000016EC  6600 000C                635              BNE ETQ16
+000016F0  3F7C 000F 0008           636              MOVE.W #15,8(SP)
+000016F6  6000 000C                637              BRA FINAL                   ;1110                  
+000016FA  3F7C 0010 0008           638  ETQ16:      MOVE.W #16,8(SP)
+00001700  6000 0002                639              BRA FINAL                   ;1111            
+00001704  301F                     640  FINAL:      MOVE.W (SP)+,D0
+00001706  4E75                     641              RTS
+00001708                           642  
+00001708                           643      ;--- FDECOD: FIN DECOD
+00001708                           644      END    START
+
+No errors detected
+No warnings generated
+
+
+SYMBOL TABLE INFORMATION
+Symbol-name         Value
+-------------------------
+ACT_ESR_C           158C
+ACT_ESR_ZN          15A6
+C_1                 159C
+C_FLAG              14CE
+C_SET1              14DE
+DECOD               15D4
+EADD                1100
+EADQ                11A2
+ECOPY               10E0
+EEXIT               129C
+EGOC                1248
+EGOI                1288
+EGON                1268
+EGOZ                1228
+EIR                 1032
+ELOA                12C8
+ELOIP               12A0
+ELSH                1158
+EMEM                1000
+ENOT                120C
+EOR                 11E2
+EPC                 1034
+ESET                11C2
+ESR                 1046
+ESTIP               12EE
+ESTO                1310
+ESUB                112A
+ET0                 1036
+ET1                 1038
+ETQ1                160C
+ETQ10               1696
+ETQ11               16A8
+ETQ12               16B2
+ETQ13               16C4
+ETQ14               16DE
+ETQ15               16E8
+ETQ16               16FA
+ETQ2                1616
+ETQ3                1628
+ETQ4                1632
+ETQ5                164C
+ETQ6                1656
+ETQ7                1668
+ETQ8                1672
+ETQ9                168C
+EX2                 103A
+EX3                 103C
+EX4                 103E
+EX5                 1040
+EX6                 1042
+EX7                 1044
+FETCH               104C
+FETCH_K             14BE
+FETCH_M             14B0
+FINAL               1704
+FIN_A               13AE
+FIN_B               142E
+FIN_C               14AE
+FIN_ELSH            119E
+FIN_ESR_C           15A0
+FIN_ESR_ZN          15CE
+FIN_FLAGC           14E2
+FIN_ZN_FLAG         1586
+FN                  15BA
+JMPLIST             107A
+NEGATIVO            157E
+N_1                 15CA
+POSITIVO            1572
+RA1                 1356
+RA2                 135E
+RA3                 136E
+RA4                 1376
+RA5                 138E
+RA6                 1396
+RA7                 13A6
+RB1                 13D6
+RB2                 13DE
+RB3                 13EE
+RB4                 13F6
+RB5                 140E
+RB6                 1416
+RB7                 1426
+RC1                 1456
+RC2                 145E
+RC3                 146E
+RC4                 1476
+RC5                 148E
+RC6                 1496
+RC7                 14A6
+REGISTRO_A          1330
+REGISTRO_B          13B0
+REGISTRO_C          1430
+RS                  118E
+START               1048
+ZN_FLAG             14EA
+Z_1                 15B6
