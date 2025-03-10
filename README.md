@@ -124,7 +124,3 @@ FETCH:
 ## Herramientas y Lenguajes
 - Ensamblador para Motorola 68000 (68K)
 - Emulador del procesador 68K para ejecutar y verificar programas ensamblados.
-
----
-
-Este proyecto es una aplicación práctica del manejo y comprensión profunda de ensambladores y arquitectura de computadores elementales.
